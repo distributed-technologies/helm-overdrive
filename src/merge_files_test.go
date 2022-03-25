@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v3"
 )
 
 // -------------------- formatYamlString Tests --------------------------
@@ -64,10 +63,10 @@ func TestFormatYamlStringReplce4SpacesWith2Spaces(t *testing.T) {
 /*
 Test whether the error returned when no path given fits the expected error
 */
-func TestMergeYamlNoPaths(t *testing.T) {
-	_, err := MergeYaml()
+func TestMergeYamlNoYamlObjects(t *testing.T) {
+	_, err := MergeYaml([]string{""})
 
-	expectedErrorString := "At lease two paths must be given"
+	expectedErrorString := "At lease two yamlObjects must be given"
 
 	assert.EqualError(t, err, expectedErrorString)
 }
@@ -75,12 +74,12 @@ func TestMergeYamlNoPaths(t *testing.T) {
 /*
 Test whether the error returned when only a single path given fits the expected error
 */
-func TestMergeYamlSinglePath(t *testing.T) {
+func TestMergeYamlSingleYamlObject(t *testing.T) {
 	file1 := genTestYamlFile(``)
 
-	expectedErrorString := "At lease two paths must be given"
+	expectedErrorString := "At lease two yamlObjects must be given"
 
-	_, err := MergeYaml(file1)
+	_, err := MergeYaml([]string{file1})
 
 	assert.EqualError(t, err, expectedErrorString)
 }
@@ -95,7 +94,7 @@ func TestMergeYamlNoContent(t *testing.T) {
 
 	expectedErrorString := "Nothing was merged"
 
-	_, err := MergeYaml(file1, file2)
+	_, err := MergeYaml([]string{file1, file2})
 
 	assert.EqualError(t, err, expectedErrorString)
 }
@@ -114,10 +113,7 @@ func TestMergeYamlMapValue(t *testing.T) {
 	name: Bar
 	`)
 
-	base := genTestYamlFile(s1)
-	override := genTestYamlFile(s2)
-
-	result, _ := MergeYaml(base, override)
+	result, _ := MergeYaml([]string{s1, s2})
 
 	assert.Equal(t, expectedYaml, result)
 }
@@ -139,10 +135,7 @@ func TestMergeYamlMapValueOverride(t *testing.T) {
 	name: Bar
 	`)
 
-	base := genTestYamlFile(s1)
-	override := genTestYamlFile(s2)
-
-	result, _ := MergeYaml(base, override)
+	result, _ := MergeYaml([]string{s1, s2})
 
 	assert.Equal(t, expectedYaml, result)
 }
@@ -170,10 +163,7 @@ func TestMergeYamlMapValueInMap(t *testing.T) {
 	name: Bar
 	`)
 
-	base := genTestYamlFile(s1)
-	override := genTestYamlFile(s2)
-
-	result, _ := MergeYaml(base, override)
+	result, _ := MergeYaml([]string{s1, s2})
 
 	assert.Equal(t, expectedYaml, result)
 }
@@ -200,60 +190,57 @@ func TestMergeYamlOverrideSlice(t *testing.T) {
 	  - Boxing
 	`)
 
-	base := genTestYamlFile(s1)
-	override := genTestYamlFile(s2)
-
-	result, _ := MergeYaml(base, override)
+	result, _ := MergeYaml([]string{s1, s2})
 
 	assert.Equal(t, expectedYaml, result)
 }
 
-// -------------------- ReadYaml Tests --------------------------
+// -------------------- MergeYamlFile Tests --------------------------
 
 /*
-Test that we can read a file and get a expected result
+Test whether the error returned when no path given fits the expected error
 */
-func TestReadYamlFileWithFile(t *testing.T) {
-	s1 := formatYamlString(`
-	name: Foo
-	sports:
-	  - football
-	  - tennis
-	`)
+func TestMergeYamlFileNoYamlObjects(t *testing.T) {
+	_, err := MergeYamlFile()
 
-	tfName := genTestYamlFile(s1)
+	expectedErrorString := "At lease two file paths must be given"
 
-	// Use the readYamlFile to read the content of the test file
-	content, err := readYamlFile(tfName)
-	if err != nil {
-		t.Fatalf("Read yaml test file: %v", err)
-	}
-
-	// Create the variable to hold the yaml content
-	var expectedContent map[interface{}]interface{}
-
-	// Unmarshal the content into maps
-	err = yaml.Unmarshal([]byte(s1), &expectedContent)
-	if err != nil {
-		t.Fatalf("Generate expected content: %v", err)
-	}
-
-	// Check that the content read from the file and the content unmarshaled is the same
-	assert.NotNil(t, content)
-	assert.Equal(t, content, expectedContent)
+	assert.EqualError(t, err, expectedErrorString)
 }
 
 /*
-Test that if no file given readYaml throws an error
+Test whether the error returned when only a single path given fits the expected error
 */
-func TestReadYamlFileNoPath(t *testing.T) {
+func TestMergeYamlFileSingleYamlObject(t *testing.T) {
+	file1 := genTestYamlFile(``)
 
-	expectedErrorString := "No path were given"
+	expectedErrorString := "At lease two file paths must be given"
 
-	content, err := readYamlFile("")
+	_, err := MergeYamlFile(file1)
 
-	assert.Nil(t, content)
 	assert.EqualError(t, err, expectedErrorString)
+}
+
+/*
+Test whether the merging the map returns the result of the last merged map
+*/
+func TestMergeYamlFileMapValue(t *testing.T) {
+	s1 := formatYamlString(`
+	name: Foo
+	`)
+	s2 := formatYamlString(`
+	name: Bar
+	`)
+	expectedYaml := formatYamlString(`
+	name: Bar
+	`)
+
+	file1 := genTestYamlFile(s1)
+	file2 := genTestYamlFile(s2)
+
+	result, _ := MergeYamlFile(file1, file2)
+
+	assert.Equal(t, expectedYaml, result)
 }
 
 // -------------------- Helper functions --------------------------

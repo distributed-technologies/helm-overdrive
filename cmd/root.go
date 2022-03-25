@@ -19,7 +19,7 @@ var rootCmd = &cobra.Command{
 	Long: `Helm-overdrive is a tool that allows the templating og multiple yaml resources on top of each other.	`,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		src.MergeYaml(viper.GetString("BASE_GLOBAL"), viper.GetString("ENV_GLOBAL"))
+		src.MergeYamlFile(viper.GetString("BASE_GLOBAL"), viper.GetString("ENV_GLOBAL"))
 	},
 }
 
