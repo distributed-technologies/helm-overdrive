@@ -1,0 +1,2 @@
+ingressDomain: base.example.com
+replicaCount: 3
