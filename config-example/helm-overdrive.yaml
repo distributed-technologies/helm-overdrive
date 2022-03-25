@@ -1,0 +1,9 @@
+helm_repo: helm-repo.foo-bar.com
+chart_name: foo-chart
+chart_version: 0.4.20
+
+base_values: ./test/base/values.yaml
+base_global: ./test/base/global.yaml
+
+env_global: ./test/env/test/global.yaml
+env_values: ./test/env/test/values.yaml
