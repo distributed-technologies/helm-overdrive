@@ -68,6 +68,7 @@ func TestMergeYamlNoYamlObjects(t *testing.T) {
 
 	expectedErrorString := "At lease two yamlObjects must be given"
 
+	assert.Error(t, err)
 	assert.EqualError(t, err, expectedErrorString)
 }
 
@@ -81,6 +82,7 @@ func TestMergeYamlSingleYamlObject(t *testing.T) {
 
 	_, err := MergeYaml([]string{file1})
 
+	assert.Error(t, err)
 	assert.EqualError(t, err, expectedErrorString)
 }
 
@@ -96,6 +98,7 @@ func TestMergeYamlNoContent(t *testing.T) {
 
 	_, err := MergeYaml([]string{file1, file2})
 
+	assert.Error(t, err)
 	assert.EqualError(t, err, expectedErrorString)
 }
 

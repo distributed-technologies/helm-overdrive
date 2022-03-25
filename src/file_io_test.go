@@ -36,18 +36,9 @@ func TestReadYamlFileWithFile(t *testing.T) {
 Test that if no file given readYaml throws an error
 */
 func TestReadYamlFileNoPath(t *testing.T) {
-
 	expectedErrorString := "No path were given"
 
-	content, err := readFile("")
+	_, err := readFile("")
 
-	assert.Empty(t, content)
 	assert.EqualError(t, err, expectedErrorString)
-}
-
-/*
-Test reading malformed yaml
-*/
-func TestReadYamlFileMalforedYaml(t *testing.T) {
-
 }
