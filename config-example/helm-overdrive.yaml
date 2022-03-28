@@ -1,9 +1,15 @@
-helm_repo: helm-repo.foo-bar.com
-chart_name: foo-chart
-chart_version: 0.4.20
+# helm_repo: https://helm.github.io/examples
+# chart_name: hello-world
+helm_repo: https://distributed-technologies.github.io/helm-charts/
+chart_name: nidhogg
+chart_version: 1.0.18
 
-base_values: ./test/base/values.yaml
-base_global: ./test/base/global.yaml
+base_values: ./config-example/base/values.yaml
+base_global: ./config-example/base/global.yaml
 
-env_global: ./test/env/test/global.yaml
-env_values: ./test/env/test/values.yaml
+env_global: ./config-example/env/test/global.yaml
+env_values: ./config-example/env/test/values.yaml
+
+# These should come from ArgoCD's env vars, see here https://argo-cd.readthedocs.io/en/stable/user-guide/build-environment/
+argocd_app_name: argocd
+argocd_app_namespace: default
