@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"helm-overdrive/src"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -10,7 +11,7 @@ import (
 )
 
 var cfgFile string
-var verbose bool
+var isDebug bool
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -41,12 +42,7 @@ func init() {
 
 	// Persistent Flags will be available to this command and all subcommands to this
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.helm-overdrive.yaml)")
-
-	// rootCmd.PersistentFlags().String("helm_repo", "", "Url to the helm repository containing the chart")
-	// rootCmd.PersistentFlags().String("chart_name", "", "Name of the chart to template")
-	// rootCmd.PersistentFlags().String("chart_version", "", "Version of the chart to use")
-	// rootCmd.PersistentFlags().String("base_values", "", "Path to base global file")
-	// rootCmd.PersistentFlags().String("base_global", "", "Path to base values file")
+	rootCmd.PersistentFlags().BoolVar(&isDebug, "debug", false, "enable debug logs")
 
 	viper.BindPFlags(rootCmd.Flags())
 }
@@ -71,6 +67,18 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+		debug("Using config file: %s", viper.ConfigFileUsed())
 	}
+}
+
+func debug(format string, v ...interface{}) {
+	if isDebug {
+		format = fmt.Sprintf("[debug] %s\n", format)
+		log.Output(2, fmt.Sprintf(format, v...))
+	}
+}
+
+func warning(format string, v ...interface{}) {
+	format = fmt.Sprintf("WARNING: %s\n", format)
+	fmt.Fprintf(os.Stderr, format, v...)
 }
