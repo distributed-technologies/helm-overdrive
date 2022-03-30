@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"helm-overdrive/src"
 	"log"
 	"os"
 
@@ -19,9 +18,8 @@ var rootCmd = &cobra.Command{
 	Short: "Templating multiple environments together",
 	Long: `Helm-overdrive is a tool that allows the templating og multiple yaml resources on top of each other.	`,
 
-	Run: func(cmd *cobra.Command, args []string) {
-		src.MergeYamlFile(viper.GetString("BASE_GLOBAL"), viper.GetString("ENV_GLOBAL"))
-	},
+	// Run: func(cmd *cobra.Command, args []string) {
+	// },
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -67,7 +65,7 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		debug("Using config file: %s", viper.ConfigFileUsed())
+		debug("Using config file: %s\n", viper.ConfigFileUsed())
 	}
 }
 

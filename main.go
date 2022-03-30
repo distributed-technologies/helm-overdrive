@@ -1,8 +1,6 @@
 package main
 
-import (
-	"helm-overdrive/cmd"
-)
+import "helm-overdrive/cmd"
 
 func main() {
 	cmd.Execute()

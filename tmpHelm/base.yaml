@@ -1,0 +1,4 @@
+---
+# Source: base/templates/values.yaml
+replicaCount: 3
+ingressDomain: test.example.com
