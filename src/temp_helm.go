@@ -31,6 +31,19 @@ func (h *TempHelmWorkspace) getValuesFileLocation() string {
 	return strings.Join([]string{h.TmpHelmDir, h.Chart_name, "values.yaml"}, "/")
 }
 
+func (h *TempHelmWorkspace) AddDirToTemplate(path string) error {
+	dir, err := os.Stat(path)
+	if err == nil {
+		if dir.IsDir() {
+			err = h.AddFileToTemplate(path)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func (h *TempHelmWorkspace) AddFileToTemplate(filePath string) error {
 	files, err := filepath.Glob(filePath)
 	if err != nil {
