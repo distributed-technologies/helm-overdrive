@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -31,11 +32,17 @@ func (h *TempHelmWorkspace) getValuesFileLocation() string {
 }
 
 func (h *TempHelmWorkspace) AddFileToTemplate(filePath string) error {
-	osCmd := exec.Command("cp", filePath, h.getTemplatesFolderLocation())
-
-	err = osCmd.Run()
+	files, err := filepath.Glob(filePath)
 	if err != nil {
 		return err
+	}
+
+	for _, path := range files {
+		osCmd := exec.Command("cp", "-r", path, h.getTemplatesFolderLocation())
+		err = osCmd.Run()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

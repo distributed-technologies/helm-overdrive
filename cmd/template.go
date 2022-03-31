@@ -5,6 +5,7 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -30,24 +31,23 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the config needed
-		// chart_name := viper.GetString("CHART_NAME")
-		// chart_version := viper.GetString("CHART_VERSION")
-		// helm_repo := viper.GetString("HELM_REPO")
-		// namespace := viper.GetString("ARGOCD_APP_NAMESPACE")
-		// releaseName := viper.GetString("ARGOCD_APP_NAME")
-
 		hod := src.HelmOverDrive{
-			Applicaiton_folder: viper.GetString("APPLICATION_FOLDER"),
-			Application_name:   viper.GetString("ARGOCD_APP_NAME"),
-			Root_path:          viper.GetString("ROOT_PATH"),
-			Base_folder:        viper.GetString("BASE_FOLDER"),
-			Env_folder:         viper.GetString("ENV_FOLDER"),
-			Environment:        viper.GetString("ENVIRONMENT"),
-			Global_file:        viper.GetString("GLOBAL_FILE"),
-			Values_file:        viper.GetString("VALUES_FILE"),
+			Additional_resources_folder: viper.GetString("Additional_resources"),
+			Applicaiton_folder:          viper.GetString("APPLICATION_FOLDER"),
+			Application_name:            viper.GetString("ARGOCD_APP_NAME"),
+			Base_folder:                 viper.GetString("BASE_FOLDER"),
+			Chart_name:                  viper.GetString("CHART_NAME"),
+			Chart_version:               viper.GetString("CHART_VERSION"),
+			Env_folder:                  viper.GetString("ENV_FOLDER"),
+			Environment:                 viper.GetString("ENVIRONMENT"),
+			Global_file:                 viper.GetString("GLOBAL_FILE"),
+			Helm_repo:                   viper.GetString("HELM_REPO"),
+			Values_file:                 viper.GetString("VALUES_FILE"),
+			Root_path:                   viper.GetString("ROOT_PATH"),
 		}
 
 		var tmpHelms []string = []string{hod.Base_folder, hod.Env_folder}
+		var err error
 
 		/*
 
@@ -111,16 +111,54 @@ to quickly create a Cobra application.`,
 
 		debug("outputFiles: %v\n", outputFiles)
 
+		// 5. pull and unpack the chart
+		hod.GetHelmChart(tmpDir)
+
+		hw := src.TempHelmWorkspace{
+			Chart_name: hod.Chart_name,
+			TmpHelmDir: tmpDir,
+		}
+
+		// 6. add additional_resources to the templates folder under a uniqe folderName
+		if hod.Additional_resources_folder != "" {
+			addDirToTemplate(hw, hod.GetBaseApplicationAdditionalResourcesFolder())
+			addDirToTemplate(hw, hod.GetEnvApplicationAdditionalResourcesFolder())
+		} else {
+			debug("additional_resources option is not present, skipping...")
+		}
+
+		// 7. template the chart with the two new value files, env value file as the last arg.
+		output, err := hw.TemplateChart(outputFiles...)
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Fprintf(os.Stdout, "%v", output)
+
 		// Clean up the tmpDir folder
-		// err = os.RemoveAll(tmpDir)
-		// if err != nil {
-		// 	panic(err)
-		// } else {
-		// 	debug("%s was deleted", tmpDir)
-		// }
+		err = os.RemoveAll(tmpDir)
+		if err != nil {
+			panic(err)
+		} else {
+			debug("%s was deleted", tmpDir)
+		}
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(templateCmd)
+}
+
+func addDirToTemplate(hw src.TempHelmWorkspace, path string) {
+	dir, err := os.Stat(path)
+	if err == nil {
+		if dir.IsDir() {
+			err = hw.AddFileToTemplate(path)
+			if err != nil {
+				panic(err)
+			}
+		}
+	} else {
+		debug("additional_resources folder not found...")
+	}
 }

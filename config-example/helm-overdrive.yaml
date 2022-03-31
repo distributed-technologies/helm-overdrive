@@ -4,24 +4,6 @@ helm_repo: https://helm.github.io/examples
 chart_name: hello-world
 chart_version: 0.1.0
 
-# # Path to the base
-# base_path: config-example/base
-
-# # Path to the environment
-# env_path: config-example/env/test
-
-# # Name of the global files
-# base_global: global.yaml
-# env_global: global.yaml
-
-# # Name of the value file in the application
-# base_application_value: values.yaml
-# env_application_value: values.yaml
-
-# # Folder containing the applications
-# base_applications: applications
-# env_applications: applications
-
 # root_path, this is the root folder containing the base and env folders
 root_path: config-example
 
@@ -42,6 +24,9 @@ values_file: values.yaml
 
 # application_folder, name of the folder that contains the applications, this is assumed to be the same in base and env folders
 application_folder: applications
+
+# additional_resources, the name of the folder that contains the additional resources, this is assumed to be the same in base and env folders
+additional_resources: additional_resources
 
 # argocd_app_name will be used to determin the path to the application to be deployed,
 # OBS! The name of the argocd app should be identical to the folder name of the applicaiton!
