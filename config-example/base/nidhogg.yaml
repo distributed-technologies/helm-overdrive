@@ -1,9 +1,0 @@
-test: foo
-shilling: bar
-spec:
-  my:
-    test:
-    - contains
-    - a
-    - list
-    - maybe?

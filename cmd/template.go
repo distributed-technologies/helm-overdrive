@@ -16,7 +16,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-const tempalteDesc = `
+const tempalteDesc = ``
+const tempalteDescDepricated = `
 This command makes two temporary Helm charts, adds the '.../<base_folder>/<application>/<values_file>' to one
 and '.../<env_folder>/<env>/<application>/<values_file>' to the other
 
@@ -40,24 +41,29 @@ var templateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the config needed
 		hod := src.HelmOverDrive{
-			Additional_resources_folder: viper.GetString("Additional_resources"),
+			Additional_resources_folder: viper.GetString("ADDITIONAL_RESOURCES"),
 			Applicaiton_folder:          viper.GetString("APPLICATION_FOLDER"),
-			Application_name:            viper.GetString("ARGOCD_APP_NAME"),
 			Base_folder:                 viper.GetString("BASE_FOLDER"),
 			Chart_name:                  viper.GetString("CHART_NAME"),
 			Chart_version:               viper.GetString("CHART_VERSION"),
 			Env_folder:                  viper.GetString("ENV_FOLDER"),
-			Environment:                 viper.GetString("ENVIRONMENT"),
 			Global_file:                 viper.GetString("GLOBAL_FILE"),
 			Helm_repo:                   viper.GetString("HELM_REPO"),
 			Values_file:                 viper.GetString("VALUES_FILE"),
-			Root_path:                   viper.GetString("ROOT_PATH"),
 		}
 
-		// Makes a slice that contains the names of the base folder and env folder
-		var tmpHelms []string = []string{hod.Base_folder, hod.Env_folder}
+		var tmpBaseName string = "base"
+		var tmpEnvName string = "env"
+		var tmpHelms []string = []string{tmpBaseName}
 		var outputFiles []string
 		var err error
+
+		debug("hod: %v\n", hod)
+		debug("hod.HasEnvironment(): %v\n", hod.HasEnvironment())
+
+		if hod.HasEnvironment() {
+			tmpHelms = append(tmpHelms, tmpEnvName)
+		}
 
 		/*
 
@@ -74,7 +80,7 @@ var templateCmd = &cobra.Command{
 		// Create a temporary folder to hold files while working
 		_, err = os.Stat(tmpDir)
 		if os.IsNotExist(err) {
-			debug("folder %s does not exist", tmpDir)
+			debug("%s does not exist", tmpDir)
 
 			if err = os.Mkdir(tmpDir, 0777); err != nil {
 				panic(err)
@@ -105,9 +111,9 @@ var templateCmd = &cobra.Command{
 
 			// Move `.../<base-folder>/<app>/values.yaml` into chart named <base-folder> and
 			// Move `.../<env-folder>/<env>/<app>/values.yaml` into chart named <env-folder>
-			if hw.Chart_name == hod.Base_folder {
+			if hw.Chart_name == tmpBaseName {
 				err = hw.AddFileToTemplate(hod.GetBaseApplicationValuesFile())
-			} else if hw.Chart_name == hod.Env_folder {
+			} else if hw.Chart_name == tmpEnvName {
 				err = hw.AddFileToTemplate(hod.GetEnvApplicationValuesFile())
 			}
 			if err != nil {
@@ -115,7 +121,12 @@ var templateCmd = &cobra.Command{
 			}
 
 			// Template both charts with  with `.../<base-folder>/<global-file>` and `.../<env-folder>/<env>/<global-file>`
-			output, err := hw.TemplateChart(hod.GetBaseGlobalFile(), hod.GetEnvGlobalFile())
+			var output string
+			if hod.HasEnvironment() {
+				output, err = hw.TemplateChart(hod.GetBaseGlobalFile(), hod.GetEnvGlobalFile())
+			} else {
+				output, err = hw.TemplateChart(hod.GetBaseGlobalFile())
+			}
 			if err != nil {
 				panic(err)
 			}
@@ -169,4 +180,16 @@ var templateCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(templateCmd)
+
+	templateCmd.Flags().String("application_folder", "", "Path to the folder that contains the application, It's assumed that the name is the same in base and env folders")
+	templateCmd.Flags().String("base_folder", "", "Path the folder containing the base config")
+	templateCmd.Flags().StringP("env_folder", "e", "", "Name of the environment folder you with to deploy")
+	templateCmd.Flags().StringP("chart_version", "v", "", "Chart version")
+	templateCmd.Flags().StringP("chart_name", "n", "", "Chart")
+	templateCmd.Flags().String("global_file", "", "Name of the global files, It's assumed that the name is the same in base and env folders")
+	templateCmd.Flags().String("helm_repo", "", "Repo url")
+	templateCmd.Flags().String("values_file", "", "Name of the value files in the application folder, It's assumed that the name is the same in base and env folders")
+	templateCmd.Flags().String("additional_resources", "", "Name of the folder that contains the additional resources, this has to be located within the <application_folder>, It's assumed that the name is the same in base and env folders")
+
+	viper.BindPFlags(templateCmd.Flags())
 }
