@@ -53,6 +53,16 @@ var templateCmd = &cobra.Command{
 			Values_file:                 viper.GetString("VALUES_FILE"),
 		}
 
+		if name := viper.GetString("APP_NAME"); name != "" {
+			debug("name: %v", name)
+			hod.App_name = name
+		} else if name := os.Getenv("ARGOCD_APP_NAME"); name != "" {
+			debug("name: %v", name)
+			hod.App_name = name
+		} else {
+			hod.App_name = hod.Chart_name
+		}
+
 		var tmpHelms []string = []string{tmpBaseName}
 		var outputFiles []string
 		var err error
@@ -92,8 +102,9 @@ var templateCmd = &cobra.Command{
 			}
 
 			hw := src.TempHelmWorkspace{
-				TmpHelmDir: tmpDir,
-				Chart_name: helm_name,
+				Tmp_helm_dir: tmpDir,
+				Chart_name:   helm_name,
+				Release_name: hod.App_name,
 			}
 
 			// Create 2 temp helm charts and remove everything in the /templates and /charts folder also cleans the values.yaml file
@@ -130,7 +141,7 @@ var templateCmd = &cobra.Command{
 			}
 
 			// Save both outputs as new values files
-			appValuesFile := strings.Join([]string{hw.TmpHelmDir, hw.Chart_name + ".yaml"}, "/")
+			appValuesFile := strings.Join([]string{hw.Tmp_helm_dir, hw.Chart_name + ".yaml"}, "/")
 			err = src.WriteOutputToFile(appValuesFile, output)
 			if err != nil {
 				panic(wrapError("Failed wrting %s to a file \n%w", appValuesFile, err))
@@ -148,8 +159,9 @@ var templateCmd = &cobra.Command{
 		}
 
 		hw := src.TempHelmWorkspace{
-			Chart_name: hod.Chart_name,
-			TmpHelmDir: tmpDir,
+			Chart_name:   hod.Chart_name,
+			Tmp_helm_dir: tmpDir,
+			Release_name: hod.App_name,
 		}
 
 		// Add additional_resources to the templates folder under the <additional_resources> folder name
@@ -191,6 +203,7 @@ func init() {
 	rootCmd.AddCommand(templateCmd)
 
 	templateCmd.Flags().String("application_folder", "", "Path to the folder that contains the application, It's assumed that the name is the same in base and env folders")
+	templateCmd.Flags().String("app_name", "", "Name of the release")
 	templateCmd.Flags().String("base_folder", "", "Path the folder containing the base config")
 	templateCmd.Flags().StringP("env_folder", "e", "", "Name of the environment folder you with to deploy")
 	templateCmd.Flags().StringP("chart_version", "v", "", "Chart version")

@@ -1,6 +1,8 @@
 helm_repo: https://helm.github.io/examples
 chart_name: hello-world
 chart_version: 0.1.0
+# app_name, Name of the release
+app_name: foo-bar
 
 # base_foler, The path the folder containing the base config
 base_folder: config-example/base

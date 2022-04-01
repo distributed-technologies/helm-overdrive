@@ -11,24 +11,25 @@ import (
 var err error
 
 type TempHelmWorkspace struct {
-	Chart_name string
-	TmpHelmDir string
+	Chart_name   string
+	Tmp_helm_dir string
+	Release_name string
 }
 
 func (h *TempHelmWorkspace) getChartFolder() string {
-	return strings.Join([]string{h.TmpHelmDir, h.Chart_name}, "/")
+	return strings.Join([]string{h.Tmp_helm_dir, h.Chart_name}, "/")
 }
 
 func (h *TempHelmWorkspace) getChartsFolderLocation() string {
-	return strings.Join([]string{h.TmpHelmDir, h.Chart_name, "charts"}, "/")
+	return strings.Join([]string{h.Tmp_helm_dir, h.Chart_name, "charts"}, "/")
 }
 
 func (h *TempHelmWorkspace) getTemplatesFolderLocation() string {
-	return strings.Join([]string{h.TmpHelmDir, h.Chart_name, "templates"}, "/")
+	return strings.Join([]string{h.Tmp_helm_dir, h.Chart_name, "templates"}, "/")
 }
 
 func (h *TempHelmWorkspace) getValuesFileLocation() string {
-	return strings.Join([]string{h.TmpHelmDir, h.Chart_name, "values.yaml"}, "/")
+	return strings.Join([]string{h.Tmp_helm_dir, h.Chart_name, "values.yaml"}, "/")
 }
 
 func (h *TempHelmWorkspace) AddDirToTemplate(path string) error {
@@ -63,7 +64,7 @@ func (h *TempHelmWorkspace) AddFileToTemplate(filePath string) error {
 
 func (h *TempHelmWorkspace) CreateHelmChart() error {
 	osCmd := exec.Command("helm", "create", h.Chart_name)
-	osCmd.Dir = h.TmpHelmDir
+	osCmd.Dir = h.Tmp_helm_dir
 
 	err = osCmd.Run()
 	if err != nil {
@@ -95,7 +96,7 @@ func (h *TempHelmWorkspace) CreateHelmChart() error {
 
 func (h *TempHelmWorkspace) TemplateChart(valueFiles ...string) (string, error) {
 
-	args := []string{"template", h.Chart_name, h.getChartFolder()}
+	args := []string{"template", h.Release_name, h.getChartFolder()}
 	for _, valueFile := range valueFiles {
 		args = append(args, "-f", valueFile)
 	}

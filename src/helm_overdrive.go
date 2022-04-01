@@ -8,6 +8,7 @@ import (
 
 type HelmOverDrive struct {
 	Additional_resources_folder string
+	App_name                    string
 	Applicaiton_folder          string
 	Chart_name                  string
 	Chart_version               string
@@ -22,6 +23,9 @@ func (h *HelmOverDrive) CheckRequired() error {
 
 	if h.Applicaiton_folder == "" {
 		return errors.New("application_folder not defined")
+	}
+	if h.App_name == "" {
+		return errors.New("app_name not defined")
 	}
 	if h.Chart_name == "" {
 		return errors.New("chart_name not defined")
