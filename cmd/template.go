@@ -153,7 +153,6 @@ var templateCmd = &cobra.Command{
 		}
 
 		// Add additional_resources to the templates folder under the <additional_resources> folder name
-		debug("hod.Additional_resources_folder: %v\n", hod.Additional_resources_folder)
 		if hod.Additional_resources_folder != "" {
 			err = hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder())
 			if err != nil {

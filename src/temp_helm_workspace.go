@@ -95,7 +95,7 @@ func (h *TempHelmWorkspace) CreateHelmChart() error {
 
 func (h *TempHelmWorkspace) TemplateChart(valueFiles ...string) (string, error) {
 
-	args := []string{"template", h.getChartFolder()}
+	args := []string{"template", h.Chart_name, h.getChartFolder()}
 	for _, valueFile := range valueFiles {
 		args = append(args, "-f", valueFile)
 	}
