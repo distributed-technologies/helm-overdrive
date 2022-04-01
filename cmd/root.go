@@ -58,7 +58,7 @@ func initConfig() {
 		viper.SetConfigFile(viper.GetString("config"))
 	} else {
 		// Look in these paths for a config file
-		viper.AddConfigPath("/etc/lib/helm-overdrive") // Checks running dir
+		viper.AddConfigPath("./") // Checks running dir
 		viper.SetConfigType("yaml")
 		viper.SetConfigName("helm-overdrive")
 	}
@@ -74,6 +74,10 @@ func debug(format string, v ...interface{}) {
 		format = fmt.Sprintf("[debug] %s\n", format)
 		log.Output(2, fmt.Sprintf(format, v...))
 	}
+}
+
+func wrapError(format string, a ...any) error {
+	return fmt.Errorf(format, a...)
 }
 
 func warning(format string, v ...interface{}) {

@@ -34,8 +34,6 @@ const tmpDir string = "tmpHelm"
 const tmpBaseName string = "base"
 const tmpEnvName string = "env"
 
-// TODO: WRAP ERRORS WITH MESSAGE
-
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
@@ -62,6 +60,11 @@ var templateCmd = &cobra.Command{
 		debug("hod: %v\n", hod)
 		debug("hod.HasEnvironment(): %v\n", hod.HasEnvironment())
 
+		// Check if required fields exists
+		if err = hod.CheckRequired(); err != nil {
+			panic(err)
+		}
+
 		// Check if an environment is present
 		if hod.HasEnvironment() {
 			tmpHelms = append(tmpHelms, tmpEnvName)
@@ -73,7 +76,7 @@ var templateCmd = &cobra.Command{
 			debug("%s does not exist", tmpDir)
 
 			if err = os.Mkdir(tmpDir, 0777); err != nil {
-				panic(err)
+				panic(wrapError("Failed in creating tmpDir \n%w", err))
 			}
 		}
 
@@ -85,7 +88,7 @@ var templateCmd = &cobra.Command{
 		*/
 		for _, helm_name := range tmpHelms {
 			if helm_name == "" {
-				panic(errors.New("base_folder and/or env_folder is missing "))
+				panic(errors.New("Base_folder and/or env_folder is missing"))
 			}
 
 			hw := src.TempHelmWorkspace{
@@ -95,37 +98,42 @@ var templateCmd = &cobra.Command{
 
 			// Create 2 temp helm charts and remove everything in the /templates and /charts folder also cleans the values.yaml file
 			if err = hw.CreateHelmChart(); err != nil {
-				debug("%s was not created", helm_name)
-				panic(err)
+				panic(wrapError("Failed creating helm chart %s \n%w", helm_name, err))
 			}
 
 			// Move `.../<base-folder>/<app>/values.yaml` into chart named <base-folder> and
 			// Move `.../<env-folder>/<env>/<app>/values.yaml` into chart named <env-folder>
 			if hw.Chart_name == tmpBaseName {
 				err = hw.AddFileToTemplate(hod.GetBaseApplicationValuesFile())
+				if err != nil {
+					panic(wrapError("Failed coping base app values to template folder \n%w", err))
+				}
 			} else if hw.Chart_name == tmpEnvName {
 				err = hw.AddFileToTemplate(hod.GetEnvApplicationValuesFile())
-			}
-			if err != nil {
-				panic(err)
+				if err != nil {
+					panic(wrapError("Failed coping env app values to template folder \n%w", err))
+				}
 			}
 
 			// Template both charts with  with `.../<base-folder>/<global-file>` and `.../<env-folder>/<env>/<global-file>`
 			var output string
 			if hod.HasEnvironment() {
 				output, err = hw.TemplateChart(hod.GetBaseGlobalFile(), hod.GetEnvGlobalFile())
+				if err != nil {
+					panic(wrapError("Failed templating %s \n%w", hw.Chart_name, err))
+				}
 			} else {
 				output, err = hw.TemplateChart(hod.GetBaseGlobalFile())
-			}
-			if err != nil {
-				panic(err)
+				if err != nil {
+					panic(wrapError("Failed templating %s \n%w", hw.Chart_name, err))
+				}
 			}
 
 			// Save both outputs as new values files
 			appValuesFile := strings.Join([]string{hw.TmpHelmDir, hw.Chart_name + ".yaml"}, "/")
 			err = src.WriteOutputToFile(appValuesFile, output)
 			if err != nil {
-				panic(err)
+				panic(wrapError("Failed wrting %s to a file \n%w", appValuesFile, err))
 			}
 
 			outputFiles = append(outputFiles, appValuesFile)
@@ -136,7 +144,7 @@ var templateCmd = &cobra.Command{
 		// Pull and unpack the chart to tmpDir
 		err = hod.GetHelmChart(tmpDir)
 		if err != nil {
-			panic(fmt.Errorf("Failed in getting helm chart \n%w", err))
+			panic(wrapError("Failed pulling %s \n%w", hod.Chart_name, err))
 		}
 
 		hw := src.TempHelmWorkspace{
@@ -149,12 +157,12 @@ var templateCmd = &cobra.Command{
 		if hod.Additional_resources_folder != "" {
 			err = hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder())
 			if err != nil {
-				panic(err)
+				panic(wrapError("Failed adding %s to templatefolder \n%w", hod.GetBaseApplicationAdditionalResourcesFolder(), err))
 			}
 			if hod.HasEnvironment() {
 				err = hw.AddDirToTemplate(hod.GetEnvApplicationAdditionalResourcesFolder())
 				if err != nil {
-					panic(err)
+					panic(wrapError("Failed adding %s to templatefolder \n%w", hod.GetBaseApplicationAdditionalResourcesFolder(), err))
 				}
 			}
 		} else {

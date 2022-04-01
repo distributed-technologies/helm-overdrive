@@ -5,7 +5,7 @@ chart_version: 0.1.0
 # base_foler, The path the folder containing the base config
 base_folder: config-example/base
 
-# env_folder, the name of the environment folder you with to deploy
+# env_folder (optional), The path to the environment folder you with to deploy
 env_folder: config-example/env/test
 
 # global_file, name of the global files, it is assumed that the file is named the same in base and env folders
@@ -17,5 +17,5 @@ values_file: values.yaml
 # application_folder, path to the folder that contains the application, this is assumed to be the same in base and env folders
 application_folder: applications/hello-world
 
-# additional_resources, the name of the folder that contains the additional resources, this has to be located within the <application_folder>, this is assumed to be the same in base and env folders
+# additional_resources (optional), the name of the folder that contains the additional resources, this has to be located within the <application_folder>, this is assumed to be the same in base and env folders
 additional_resources: additional_resources

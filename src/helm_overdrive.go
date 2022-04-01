@@ -1,6 +1,7 @@
 package src
 
 import (
+	"errors"
 	"os/exec"
 	"strings"
 )
@@ -15,6 +16,33 @@ type HelmOverDrive struct {
 	Global_file                 string
 	Helm_repo                   string
 	Values_file                 string
+}
+
+func (h *HelmOverDrive) CheckRequired() error {
+
+	if h.Applicaiton_folder == "" {
+		return errors.New("application_folder not defined")
+	}
+	if h.Chart_name == "" {
+		return errors.New("chart_name not defined")
+	}
+	if h.Chart_version == "" {
+		return errors.New("chart_version not defined")
+	}
+	if h.Base_folder == "" {
+		return errors.New("base_folder not defined")
+	}
+	if h.Global_file == "" {
+		return errors.New("global_file not defined")
+	}
+	if h.Helm_repo == "" {
+		return errors.New("helm_repo not defined")
+	}
+	if h.Values_file == "" {
+		return errors.New("values_file not defined")
+	}
+
+	return nil
 }
 
 func (h *HelmOverDrive) GetBaseGlobalFile() string {
