@@ -30,8 +30,9 @@ this is also done with the '.../<env_folder>/<env>/<application>/<additional_res
 
 The chart is then templated with the two values files that was generated earlier.
 `
-
 const tmpDir string = "tmpHelm"
+const tmpBaseName string = "base"
+const tmpEnvName string = "env"
 
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
@@ -52,8 +53,6 @@ var templateCmd = &cobra.Command{
 			Values_file:                 viper.GetString("VALUES_FILE"),
 		}
 
-		var tmpBaseName string = "base"
-		var tmpEnvName string = "env"
 		var tmpHelms []string = []string{tmpBaseName}
 		var outputFiles []string
 		var err error
@@ -61,21 +60,10 @@ var templateCmd = &cobra.Command{
 		debug("hod: %v\n", hod)
 		debug("hod.HasEnvironment(): %v\n", hod.HasEnvironment())
 
+		// Check if an environment is present
 		if hod.HasEnvironment() {
 			tmpHelms = append(tmpHelms, tmpEnvName)
 		}
-
-		/*
-
-			1. create 2 temp helm charts and remove everything in the /templates and /charts folder
-			2. move base/<app>/values.yaml into 1. chart and move env/<env>/<app>/values.yaml into 2. chart
-			3. template both charts with the base/global.yaml and env/<env>/global.yaml
-			4. save both outputs as new values files
-			5. pull and unpack the chart
-			6. add additional_resources to the templates folder under a uniqe folderName
-			7. template the chart with the two new value files, env value file as the last arg.
-
-		*/
 
 		// Create a temporary folder to hold files while working
 		_, err = os.Stat(tmpDir)
@@ -144,7 +132,10 @@ var templateCmd = &cobra.Command{
 		debug("outputFiles: %v\n", outputFiles)
 
 		// Pull and unpack the chart to tmpDir
-		hod.GetHelmChart(tmpDir)
+		err = hod.GetHelmChart(tmpDir)
+		if err != nil {
+			panic(err)
+		}
 
 		hw := src.TempHelmWorkspace{
 			Chart_name: hod.Chart_name,
@@ -152,9 +143,18 @@ var templateCmd = &cobra.Command{
 		}
 
 		// Add additional_resources to the templates folder under the <additional_resources> folder name
+		debug("hod.Additional_resources_folder: %v\n", hod.Additional_resources_folder)
 		if hod.Additional_resources_folder != "" {
-			hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder())
-			hw.AddDirToTemplate(hod.GetEnvApplicationAdditionalResourcesFolder())
+			err = hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder() + "/*")
+			if err != nil {
+				panic(err)
+			}
+			if hod.HasEnvironment() {
+				err = hw.AddDirToTemplate(hod.GetEnvApplicationAdditionalResourcesFolder() + "/*")
+				if err != nil {
+					panic(err)
+				}
+			}
 		} else {
 			debug("additional_resources option is not present, skipping...")
 		}
@@ -169,12 +169,12 @@ var templateCmd = &cobra.Command{
 		fmt.Fprintf(os.Stdout, "%v", output)
 
 		// Clean up the tmpDir folder
-		err = os.RemoveAll(tmpDir)
-		if err != nil {
-			panic(err)
-		} else {
-			debug("%s was deleted", tmpDir)
-		}
+		// err = os.RemoveAll(tmpDir)
+		// if err != nil {
+		// 	panic(err)
+		// } else {
+		// 	debug("%s was deleted", tmpDir)
+		// }
 	},
 }
 

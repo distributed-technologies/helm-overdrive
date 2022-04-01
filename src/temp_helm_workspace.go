@@ -2,6 +2,7 @@ package src
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -45,13 +46,21 @@ func (h *TempHelmWorkspace) AddDirToTemplate(path string) error {
 }
 
 func (h *TempHelmWorkspace) AddFileToTemplate(filePath string) error {
+	fmt.Printf("filePath: %v\n", filePath)
 	files, err := filepath.Glob(filePath)
 	if err != nil {
 		return err
 	}
-
+	fmt.Printf("files: %v\n", files)
 	for _, path := range files {
-		osCmd := exec.Command("cp", "-r", path, h.getTemplatesFolderLocation())
+		fmt.Printf("Coping %v\n", path)
+		osCmd := exec.Command("cp", path, h.getTemplatesFolderLocation())
+
+		var out bytes.Buffer
+		osCmd.Stdout = &out
+
+		fmt.Printf("out.String(): %v\n", out.String())
+
 		err = osCmd.Run()
 		if err != nil {
 			return err
