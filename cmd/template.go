@@ -171,12 +171,12 @@ var templateCmd = &cobra.Command{
 		fmt.Fprintf(os.Stdout, "%v", output)
 
 		// Clean up the tmpDir folder
-		// err = os.RemoveAll(tmpDir)
-		// if err != nil {
-		// 	panic(err)
-		// } else {
-		// 	debug("%s was deleted", tmpDir)
-		// }
+		err = os.RemoveAll(tmpDir)
+		if err != nil {
+			panic(err)
+		} else {
+			debug("%s was deleted", tmpDir)
+		}
 	},
 }
 
