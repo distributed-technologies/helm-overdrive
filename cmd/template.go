@@ -34,6 +34,8 @@ const tmpDir string = "tmpHelm"
 const tmpBaseName string = "base"
 const tmpEnvName string = "env"
 
+// TODO: WRAP ERRORS WITH MESSAGE
+
 // templateCmd represents the template command
 var templateCmd = &cobra.Command{
 	Use:   "template",
@@ -134,7 +136,7 @@ var templateCmd = &cobra.Command{
 		// Pull and unpack the chart to tmpDir
 		err = hod.GetHelmChart(tmpDir)
 		if err != nil {
-			panic(err)
+			panic(fmt.Errorf("Failed in getting helm chart \n%w", err))
 		}
 
 		hw := src.TempHelmWorkspace{
@@ -145,12 +147,12 @@ var templateCmd = &cobra.Command{
 		// Add additional_resources to the templates folder under the <additional_resources> folder name
 		debug("hod.Additional_resources_folder: %v\n", hod.Additional_resources_folder)
 		if hod.Additional_resources_folder != "" {
-			err = hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder() + "/*")
+			err = hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder())
 			if err != nil {
 				panic(err)
 			}
 			if hod.HasEnvironment() {
-				err = hw.AddDirToTemplate(hod.GetEnvApplicationAdditionalResourcesFolder() + "/*")
+				err = hw.AddDirToTemplate(hod.GetEnvApplicationAdditionalResourcesFolder())
 				if err != nil {
 					panic(err)
 				}
