@@ -1,4 +1,4 @@
-package src
+package pkg
 
 import (
 	"bytes"
@@ -9,6 +9,14 @@ import (
 )
 
 var err error
+var osStat = os.Stat
+var glob = filepath.Glob
+var cmdRun = (*exec.Cmd).Run
+var removeAll = os.RemoveAll
+var remove = os.Remove
+var mkdir = os.Mkdir
+var create = os.Create
+var writeFile = os.WriteFile
 
 type TempHelmWorkspace struct {
 	Chart_name   string
@@ -33,7 +41,7 @@ func (h *TempHelmWorkspace) getValuesFileLocation() string {
 }
 
 func (h *TempHelmWorkspace) AddDirToTemplate(path string) error {
-	dir, err := os.Stat(path)
+	dir, err := osStat(path)
 	if err == nil {
 		if dir.IsDir() {
 			err = h.AddFileToTemplate(path)
@@ -41,19 +49,21 @@ func (h *TempHelmWorkspace) AddDirToTemplate(path string) error {
 				return err
 			}
 		}
+	} else {
+		return err
 	}
 	return nil
 }
 
 func (h *TempHelmWorkspace) AddFileToTemplate(filePath string) error {
-	files, err := filepath.Glob(filePath)
+	files, err := glob(filePath)
 	if err != nil {
 		return err
 	}
 
 	for _, path := range files {
 		osCmd := exec.Command("cp", "-r", path, h.getTemplatesFolderLocation())
-		err = osCmd.Run()
+		err = cmdRun(osCmd)
 		if err != nil {
 			return err
 		}
@@ -66,28 +76,28 @@ func (h *TempHelmWorkspace) CreateHelmChart() error {
 	osCmd := exec.Command("helm", "create", h.Chart_name)
 	osCmd.Dir = h.Tmp_helm_dir
 
-	err = osCmd.Run()
+	err = cmdRun(osCmd)
 	if err != nil {
 		return err
 	}
 
-	if err = os.RemoveAll(h.getChartsFolderLocation()); err != nil {
+	if err = removeAll(h.getChartsFolderLocation()); err != nil {
 		return err
 	}
 
-	if err = os.RemoveAll(h.getTemplatesFolderLocation()); err != nil {
+	if err = removeAll(h.getTemplatesFolderLocation()); err != nil {
 		return err
 	}
 
-	if err = os.Remove(h.getValuesFileLocation()); err != nil {
+	if err = remove(h.getValuesFileLocation()); err != nil {
 		return err
 	}
 
-	if err = os.Mkdir(h.getTemplatesFolderLocation(), 0777); err != nil {
+	if err = mkdir(h.getTemplatesFolderLocation(), 0777); err != nil {
 		return err
 	}
 
-	if _, err = os.Create(h.getValuesFileLocation()); err != nil {
+	if _, err = create(h.getValuesFileLocation()); err != nil {
 		return err
 	}
 
@@ -106,7 +116,7 @@ func (h *TempHelmWorkspace) TemplateChart(valueFiles ...string) (string, error) 
 	var out bytes.Buffer
 	osCmd.Stdout = &out
 
-	err := osCmd.Run()
+	err := cmdRun(osCmd)
 
 	if err != nil {
 		return "", err
@@ -116,7 +126,7 @@ func (h *TempHelmWorkspace) TemplateChart(valueFiles ...string) (string, error) 
 }
 
 func WriteOutputToFile(filename, output string) error {
-	if err := os.WriteFile(filename, []byte(output), 0666); err != nil {
+	if err := writeFile(filename, []byte(output), 0666); err != nil {
 		return err
 	}
 	return nil

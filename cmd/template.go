@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"helm-overdrive/src"
+	"helm-overdrive/pkg"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -41,7 +41,7 @@ var templateCmd = &cobra.Command{
 	Long:  tempalteDesc,
 	Run: func(cmd *cobra.Command, args []string) {
 		// Get the config needed
-		hod := src.HelmOverDrive{
+		hod := pkg.HelmOverDrive{
 			Additional_resources_folder: viper.GetString("ADDITIONAL_RESOURCES"),
 			Applicaiton_folder:          viper.GetString("APPLICATION_FOLDER"),
 			Base_folder:                 viper.GetString("BASE_FOLDER"),
@@ -101,7 +101,7 @@ var templateCmd = &cobra.Command{
 				panic(errors.New("Base_folder and/or env_folder is missing"))
 			}
 
-			hw := src.TempHelmWorkspace{
+			hw := pkg.TempHelmWorkspace{
 				Tmp_helm_dir: tmpDir,
 				Chart_name:   helm_name,
 				Release_name: hod.App_name,
@@ -142,7 +142,7 @@ var templateCmd = &cobra.Command{
 
 			// Save both outputs as new values files
 			appValuesFile := strings.Join([]string{hw.Tmp_helm_dir, hw.Chart_name + ".yaml"}, "/")
-			err = src.WriteOutputToFile(appValuesFile, output)
+			err = pkg.WriteOutputToFile(appValuesFile, output)
 			if err != nil {
 				panic(wrapError("Failed wrting %s to a file \n%w", appValuesFile, err))
 			}
@@ -158,7 +158,7 @@ var templateCmd = &cobra.Command{
 			panic(wrapError("Failed pulling %s \n%w", hod.Chart_name, err))
 		}
 
-		hw := src.TempHelmWorkspace{
+		hw := pkg.TempHelmWorkspace{
 			Chart_name:   hod.Chart_name,
 			Tmp_helm_dir: tmpDir,
 			Release_name: hod.App_name,
