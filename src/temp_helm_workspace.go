@@ -98,7 +98,7 @@ func (h *TempHelmWorkspace) TemplateChart(valueFiles ...string) (string, error) 
 
 	args := []string{"template", h.Release_name, h.getChartFolder()}
 	for _, valueFile := range valueFiles {
-		args = append(args, "-f", valueFile)
+		args = append(args, "--include-crds", "-f", valueFile)
 	}
 
 	osCmd := exec.Command("helm", args...)
