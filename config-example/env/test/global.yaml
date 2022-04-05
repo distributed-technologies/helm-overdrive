@@ -1,7 +1,2 @@
-overdriveConf:
-  envFolder: env/test
-
-repo:
-  targetRevision: initial-suggestion
-
 ingressDomain: test.example.com
+replicaCount: 1

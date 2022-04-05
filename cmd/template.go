@@ -211,7 +211,7 @@ func init() {
 	templateCmd.Flags().String("global_file", "", "Name of the global files, It's assumed that the name is the same in base and env folders")
 	templateCmd.Flags().String("helm_repo", "", "Repo url")
 	templateCmd.Flags().String("values_file", "", "Name of the value files in the application folder, It's assumed that the name is the same in base and env folders")
-	templateCmd.Flags().String("additional_resources", "", "Name of the folder that contains the additional resources, this has to be located within the <application_folder>, It's assumed that the name is the same in base and env folders")
+	templateCmd.Flags().String("additional_resources", "", "Path to the folder that contains the additional resources, this has to be located within the <application_folder>, It's assumed that the name is the same in base and env folders")
 
 	viper.BindPFlags(templateCmd.Flags())
 }
