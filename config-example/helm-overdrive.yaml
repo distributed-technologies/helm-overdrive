@@ -1,7 +1,7 @@
 # ----------- Base parameters that must be set -----------
 
 # base_foler, The path the folder containing the base config
-base_folder: base
+base_folder: config-example/base
 
 # global_file, Name of the global files, it is assumed that the file is named the same in base and env folders
 global_file: global.yaml
@@ -20,8 +20,8 @@ additional_resources: additional_resources
 # ----------- Should be specified per application in argocd -----------
 
 # application_folder, Path to the folder that contains the application, this is assumed to be the same in base and env folders
-# application_folder: services/metallb
+application_folder: applications/hello-world
 
-# helm_repo: https://helm.github.io/examples
-# chart_name: hello-world
-# chart_version: 0.1.0
+helm_repo: https://helm.github.io/examples
+chart_name: hello-world
+chart_version: 0.1.0

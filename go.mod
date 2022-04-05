@@ -1,4 +1,4 @@
-module helm-overdrive
+module github.com/distributed-technologies/helm-overdrive
 
 go 1.18
 
