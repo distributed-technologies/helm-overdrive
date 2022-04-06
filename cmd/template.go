@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/distributed-technologies/helm-overdrive/pkg"
+	pkg "github.com/distributed-technologies/helm-overdrive/pkg/template"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
