@@ -103,14 +103,54 @@ helm-overdrive --config helm-overdrive.yaml
 
 Available keys can be found [here](#config)
 
-### Using a flags, envs, and config
-The tool i designed with the intent that users should be able to set these different values in different ways.
-
-so that setting the folder structure in the config file but changing the chart-version using environment variables is an option.
-
-
 ## ArgoCD
-TBD
+Helm-overdrive is inteted to be used as a plugin source for [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
+
+This can be done by making a HO repository, containing the `helm-overdrive.yaml` config and at least the base folder setup.
+
+the `helm-overdrive.yaml` config would then contain the general folder structure.
+
+then using [ArgoCD's guide](https://argo-cd.readthedocs.io/en/stable/operator-manual/custom_tools/) on how to add custom tools and add a [configManagementPlugin](https://argo-cd.readthedocs.io/en/stable/user-guide/config-management-plugins/)
+
+We can add helm overdrive to ArgoCD to be used as a plugin.
+
+Then for the app you want to install you create a application resource, pointing to the plugin, and fill out the last fields as environment variables
+``` yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: hello-world
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+  source:
+    repoURL: <pointing to the helm-overdrive repo you created>
+    targetRevision: <the branch on that repo>
+    path: <path to the root of the repo>
+    plugin:
+      name: helm-overdrive
+      env:
+      - name: HO_APPLICATION_FOLDER
+        value: applications/hello-world
+      - name: HO_HELM_REPO
+        value: https://helm.github.io/examples
+      - name: HO_CHART_NAME
+        value: hello-world
+      - name: HO_CHART_VERSION
+        value: "0.1.0"
+```
+
+This should create a application called hello-world, that has been templated using helm-overdrive.
 
 ## code flow-chart
 The diagram for the code flow can be seen here:<br>
