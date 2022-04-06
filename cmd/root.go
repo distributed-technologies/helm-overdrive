@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 
+	"github.com/distributed-technologies/helm-overdrive/pkg/logging"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -34,15 +33,12 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	// Persistent Flags will be available to this command and all subcommands to this
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.helm-overdrive.yaml)")
 	rootCmd.PersistentFlags().BoolVar(&isDebug, "debug", false, "enable debug logs")
 
 	viper.BindPFlags(rootCmd.Flags())
+	viper.BindPFlags(rootCmd.PersistentFlags())
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -65,22 +61,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		debug("Using config file: %s\n", viper.ConfigFileUsed())
+		logging.Debug("Using config file: %s\n", viper.ConfigFileUsed())
 	}
-}
-
-func debug(format string, v ...interface{}) {
-	if isDebug {
-		format = fmt.Sprintf("[debug] %s\n", format)
-		log.Output(2, fmt.Sprintf(format, v...))
-	}
-}
-
-func wrapError(format string, a ...any) error {
-	return fmt.Errorf(format, a...)
-}
-
-func warning(format string, v ...interface{}) {
-	format = fmt.Sprintf("WARNING: %s\n", format)
-	fmt.Fprintf(os.Stderr, format, v...)
 }
