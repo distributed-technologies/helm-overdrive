@@ -2,6 +2,7 @@ package template
 
 import (
 	"errors"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -47,6 +48,16 @@ func (h *HelmOverDrive) CheckRequired() error {
 	}
 
 	return nil
+}
+
+func (h *HelmOverDrive) CheckFolderExists(pathToFolder string) bool {
+	_, err := os.Stat(pathToFolder)
+	if os.IsNotExist(err) {
+		// Return false if the folder does not exist
+		return false
+	}
+
+	return true
 }
 
 func (h *HelmOverDrive) GetBaseGlobalFile() string {

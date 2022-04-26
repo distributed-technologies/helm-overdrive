@@ -149,12 +149,12 @@ func Template(additional_resources_folder,
 	}
 
 	// Add additional_resources to the templates folder under the <additional_resources> folder name
-	if hod.Additional_resources_folder != "" {
+	if hod.Additional_resources_folder != "" && hod.CheckFolderExists(hod.GetBaseApplicationAdditionalResourcesFolder()) {
 		err = hw.AddDirToTemplate(hod.GetBaseApplicationAdditionalResourcesFolder())
 		if err != nil {
 			return (logging.WrapError("Failed adding %s to templatefolder \n%w", hod.GetBaseApplicationAdditionalResourcesFolder(), err))
 		}
-		if hod.HasEnvironment() {
+		if hod.HasEnvironment() && hod.CheckFolderExists(hod.GetEnvApplicationAdditionalResourcesFolder() {
 			err = hw.AddDirToTemplate(hod.GetEnvApplicationAdditionalResourcesFolder())
 			if err != nil {
 				return (logging.WrapError("Failed adding %s to templatefolder \n%w", hod.GetBaseApplicationAdditionalResourcesFolder(), err))
