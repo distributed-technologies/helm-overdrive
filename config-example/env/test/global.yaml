@@ -1,0 +1,2 @@
+ingressDomain: test.example.com
+replicaCount: 1

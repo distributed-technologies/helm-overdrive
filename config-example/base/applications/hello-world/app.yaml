@@ -1,0 +1,8 @@
+apiVersion: argocd-discover/v1alpha1
+name: hello-world
+namespace: networking
+project: default
+source:
+  helm_repo: https://helm.github.io/examples
+  chart_name: hello-world
+  chart_version: 0.1.0
